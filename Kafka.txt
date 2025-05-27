@@ -1,0 +1,73 @@
+*****Installation and setup of Kafka***
+// Install the Kafka from the Official Website kafka.apche.org of the version-"kafka_2.13-3.4.0"
+// After installation of Kafka place the folder in the location You want to work and unzip the folder
+
+// Open the path ".\kafka_2.13-3.4.0\bin\windows\kafka-server-start.bat" from the Kafka folder and Update the file with this text
+
+>>> kafka-server-start.bat
+
+@echo off
+rem Licensed to the Apache Software Foundation (ASF) under one or more
+rem contributor license agreements.  See the NOTICE file distributed with
+rem this work for additional information regarding copyright ownership.
+rem The ASF licenses this file to You under the Apache License, Version 2.0
+rem (the "License"); you may not use this file except in compliance with
+rem the License.  You may obtain a copy of the License at
+rem
+rem     http://www.apache.org/licenses/LICENSE-2.0
+rem
+rem Unless required by applicable law or agreed to in writing, software
+rem distributed under the License is distributed on an "AS IS" BASIS,
+rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+rem See the License for the specific language governing permissions and
+rem limitations under the License.
+ 
+IF [%1] EQU [] (
+	echo USAGE: %0 server.properties
+	EXIT /B 1
+)
+ 
+SetLocal
+IF ["%KAFKA_LOG4J_OPTS%"] EQU [""] (
+    set KAFKA_LOG4J_OPTS=-Dlog4j.configuration=file:%~dp0../../config/log4j.properties
+)
+IF ["%KAFKA_HEAP_OPTS%"] EQU [""] (
+    rem Hardcode heap size for 64-bit OS
+    set KAFKA_HEAP_OPTS=-Xmx1G -Xms1G
+)
+"%~dp0kafka-run-class.bat" kafka.Kafka %*
+EndLocal
+
+// Save the file
+
+// Next Open a command prompt with the path ".\kafka_2.13-3.4.0"and execute the following command to start the Zookeeper(broker)
+> .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+
+// To run the  kafka server Run the following command by opening another terminal with same path as above
+> '.\bin\windows\kafka-server-start.bat .\config\server.properties'
+
+// Now Create a topic by opening another terminal with the path ".\kafka_2.13-3.4.0\bin\windows" and execute the following command
+> kafka-topics.bat --bootstrap-server localhost:9092 --create --topic topic-name
+// You will see a prompt message 
+> Created topic topic-name.
+
+// Now Run the Producer in the same terminal (choice) with the following command
+> kafka-console-producer.bat --bootstrap-server localhost:9092 --topic topic-name
+
+// Producer will ask for a prompt message which you can send to the consumer in json format
+// Enter a json object in the prompt
+Ex: {"message":"App is under maintenace","status":false} (Do not hit Enter until consumer is created)
+
+// Now run the Consumer in another terminal with the path ".\kafka_2.13-3.4.0\bin\windows" and execute the following command
+> kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic topic-name
+
+// Now hit Enter in producer terminal with the json object
+// You can see the same object in the consumer terminal
+// So you can send as many messages as you want to consume
+
+// To Get the messages from the producer to consumer from beginning use the following command
+> kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic topic-name --from-beginning
+
+// To list all the topics in Kafka use the following command in the path ".\kafka_2.13-3.4.0\bin\windows"
+> kafka-topics.bat --list --bootstrap-server localhost:9092
+
